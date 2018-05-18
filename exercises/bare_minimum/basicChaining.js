@@ -12,20 +12,15 @@ var fs = require('fs');
 var promisification = require('./promisification');
 var promiseConstructor = require('./promiseConstructor');
 var Promise = require('bluebird');
-
+var writeFile = Promise.promisify(fs.writeFile);
 
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
   return promiseConstructor.pluckFirstLineFromFileAsync(readFilePath)
-  .then(function(user) {
-    console.log(user);
-    return promisification.getGitHubProfileAsync(user)
-  }).then(function(body) {
-    console.log(body);
-    var obj = JSON.stringify(body);
-    return fs.writeFile(writeFilePath, obj, 'utf8', function(err, res) {
-      if (err) console.log(err)
-    })
+  .then(promisification.getGitHubProfileAsync
+  ).then(function(body) {
+    var obj = JSON.stringify(body)
+    return writeFile(writeFilePath, obj)
   })
 };
 
